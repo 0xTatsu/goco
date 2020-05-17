@@ -19,13 +19,7 @@ var urls = []string{
 	"http://jack-random.herokuapp.com/number/77",
 }
 
-func main() {
-	//usingWaitGroup()
-	usingBufferChannel()
-	//usingChannel()
-}
-
-func usingWaitGroup() {
+func usingWaitGroup() int {
 	var wg sync.WaitGroup
 	var myMutex sync.Mutex
 	var maxNumber = math.MinInt64
@@ -46,10 +40,10 @@ func usingWaitGroup() {
 
 	wg.Wait()
 
-	fmt.Println(maxNumber)
+	return maxNumber
 }
 
-func usingBufferChannel() {
+func usingBufferChannel() int {
 	myIntChannel := make(chan int, len(urls))
 	var maxNumber = math.MinInt64
 
@@ -67,10 +61,10 @@ func usingBufferChannel() {
 		}
 	}
 
-	fmt.Println(maxNumber)
+	return maxNumber
 }
 
-func usingChannel() {
+func usingChannel() int {
 	myIntChannel := make(chan int)
 	var maxNumber = math.MinInt64
 
@@ -95,7 +89,7 @@ func usingChannel() {
 	//	}
 	//}
 
-	fmt.Println(maxNumber)
+	return maxNumber
 }
 
 func get(url string) (*int, error) {
