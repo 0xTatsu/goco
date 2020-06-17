@@ -18,7 +18,6 @@ type Fetcher interface {
 type SafeCache struct {
 	seenMap map[string]bool
 	mux     *sync.Mutex
-	wg      *sync.WaitGroup
 }
 
 func (s SafeCache) isVisited(url string) bool {
@@ -34,12 +33,13 @@ func (s SafeCache) isVisited(url string) bool {
 	return false
 }
 
-var c = SafeCache{seenMap: make(map[string]bool), mux: &sync.Mutex{}, wg: &sync.WaitGroup{}}
+var wg = sync.WaitGroup{}
+var c = SafeCache{seenMap: make(map[string]bool), mux: &sync.Mutex{}}
 
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
 func Crawl(url string, depth int, fetcher Fetcher) {
-	defer c.wg.Done()
+	defer wg.Done()
 
 	if depth <= 0 {
 		return
@@ -58,15 +58,15 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	fmt.Printf("found: %s %q\n", url, body)
 
 	for _, u := range urls {
-		c.wg.Add(1)
+		wg.Add(1)
 		go Crawl(u, depth-1, fetcher)
 	}
 }
 
 func StartURLCrawler() {
-	c.wg.Add(1)
+	wg.Add(1)
 	Crawl("https://golang.org/", 4, fetcher)
-	c.wg.Wait()
+	wg.Wait()
 	//time.Sleep(5 * time.Second)
 }
 

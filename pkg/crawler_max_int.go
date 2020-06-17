@@ -29,11 +29,11 @@ func usingWaitGroup() int {
 
 		go func(url string, wg *sync.WaitGroup) {
 			num, _ := get(url)
-			myMutex.Lock()
 			if *num > maxNumber {
+				myMutex.Lock()
 				maxNumber = *num
+				myMutex.Unlock()
 			}
-			myMutex.Unlock()
 			wg.Done()
 		}(url, &wg)
 	}
