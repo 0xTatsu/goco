@@ -92,6 +92,39 @@ func usingChannel() int {
 	return maxNumber
 }
 
+func usingAll() int {
+	var maxNumber = math.MinInt64
+
+	var (
+		workPoolChannel = make(chan struct{}, 2)
+		resultChannel   = make(chan int)
+		wg              sync.WaitGroup
+	)
+
+	for _, url := range urls {
+		wg.Add(1)
+
+		go func(url string) {
+			defer wg.Done()
+			num, _ := get(url)
+			resultChannel <- *num
+
+			<-workPoolChannel
+		}(url)
+	}
+
+	for i := 0; i < len(urls); i++ {
+		number := <-resultChannel
+		if maxNumber < number {
+			maxNumber = number
+		}
+	}
+
+	wg.Wait()
+
+	return maxNumber
+}
+
 func get(url string) (*int, error) {
 	httpClient := &http.Client{Timeout: 10 * time.Second}
 
